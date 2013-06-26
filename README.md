@@ -1,4 +1,11 @@
 some_random_project
 ===================
 
-A random project to demonstrate good practices for collaborative git use
+This project is meant to help us learn a good collaborative workflow.
+
+Key ideas: 
+
+- Branch on feature (create a new branch for each feature)
+- Pull requests
+- Code review using github
+- Write documentation (sphinx, readmes, markdown, reStructureText)

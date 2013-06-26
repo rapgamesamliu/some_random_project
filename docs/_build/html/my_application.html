@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>my_application Package &mdash; Random Project 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Random Project 0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Random Project 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="my-application-package">
+<h1>my_application Package<a class="headerlink" href="#my-application-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-my_application.streaming_api">
+<span id="streaming-api-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">streaming_api</span></tt> Module<a class="headerlink" href="#module-my_application.streaming_api" title="Permalink to this headline">¶</a></h2>
+<p>streaming_api.py</p>
+<p>Written May 17-20, 2011 by Josiah Carlson
+Released under the GNU GPL v2
+available: <a class="reference external" href="http://www.gnu.org/licenses/gpl-2.0.html">http://www.gnu.org/licenses/gpl-2.0.html</a></p>
+<p>Other licenses may be available upon request.</p>
+<p>Given a Redis server and a task queue implementation, this code implements the
+equivalent of Twitter&#8217;s streaming API as specified here:</p>
+<blockquote>
+<div><a class="reference external" href="http://dev.twitter.com/pages/streaming_api_methods">http://dev.twitter.com/pages/streaming_api_methods</a></div></blockquote>
+<p>with a few differences:
+1. Usernames are followed instead of user ids when using the follow call.
+2. The attributes used for various items (retweeted_by, author, created_at)</p>
+<blockquote>
+<div>aren&#8217;t necessarily the same names or the same types as what Twitter uses.</div></blockquote>
+<ol class="arabic simple" start="3">
+<li>Client access restrictions, limitations, etc., are not handled here.</li>
+</ol>
+<p>The primary goals of this implementation is to allow for workers to process as
+fast as possible, but still &#8220;work&#8221; if they are unable to keep up, or if the
+client they are working for is unable to receive data fast enough.</p>
+<dl class="class">
+<dt id="my_application.streaming_api.FollowCriteria">
+<em class="property">class </em><tt class="descclassname">my_application.streaming_api.</tt><tt class="descname">FollowCriteria</tt><big>(</big><em>people</em><big>)</big><a class="headerlink" href="#my_application.streaming_api.FollowCriteria" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="my_application.streaming_api.LocationCriteria">
+<em class="property">class </em><tt class="descclassname">my_application.streaming_api.</tt><tt class="descname">LocationCriteria</tt><big>(</big><em>boxes</em><big>)</big><a class="headerlink" href="#my_application.streaming_api.LocationCriteria" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="my_application.streaming_api.TrackCriteria">
+<em class="property">class </em><tt class="descclassname">my_application.streaming_api.</tt><tt class="descname">TrackCriteria</tt><big>(</big><em>list_of_ors</em><big>)</big><a class="headerlink" href="#my_application.streaming_api.TrackCriteria" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="my_application.streaming_api.cleaner">
+<tt class="descclassname">my_application.streaming_api.</tt><tt class="descname">cleaner</tt><big>(</big><em>conn</em><big>)</big><a class="headerlink" href="#my_application.streaming_api.cleaner" title="Permalink to this definition">¶</a></dt>
+<dd><p>At least one of these should be run on any given Redis server that is
+hosting the streaming data.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="my_application.streaming_api.got_status">
+<tt class="descclassname">my_application.streaming_api.</tt><tt class="descname">got_status</tt><big>(</big><em>conn</em>, <em>status</em>, <em>id=None</em><big>)</big><a class="headerlink" href="#my_application.streaming_api.got_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will work until there are 2**53 ids generated, then we may get
+duplicate messages sent to the workers. There are some work-arounds, but
+they confuse the clean flow of the existing code.</p>
+<p>This function takes a Redis connection object, a status message, and an
+optional id. If the id is not None, the status message is assumed to be
+pre-dumped to json. If the id is None, the status will have a new id
+assigned to it, along with the current timestamp in seconds since the
+standard unix epoch.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="my_application.streaming_api.replicator">
+<tt class="descclassname">my_application.streaming_api.</tt><tt class="descname">replicator</tt><big>(</big><em>source_conn</em>, <em>dest_conn</em><big>)</big><a class="headerlink" href="#my_application.streaming_api.replicator" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is to perform zero-slave replication for when a single Redis server
+is not fast enough to handle clients pulling the tweets.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="my_application.streaming_api.spawn_worker_and_subscribe">
+<tt class="descclassname">my_application.streaming_api.</tt><tt class="descname">spawn_worker_and_subscribe</tt><big>(</big><em>which</em>, <em>content=None</em>, <em>backlog=0</em><big>)</big><a class="headerlink" href="#my_application.streaming_api.spawn_worker_and_subscribe" title="Permalink to this definition">¶</a></dt>
+<dd><p>This would be called by a web server to connect to some Redis server that
+is holding all of the status messages and data, yielding results as they
+become available.</p>
+<p>This function requires two utility functions be present:
+get_new_redis_connection(which):</p>
+<blockquote>
+<div>This will create or reuse a connection to some Redis server that is
+hosting the status messages.</div></blockquote>
+<dl class="docutils">
+<dt>spawn_worker(...):</dt>
+<dd>This will spawn the worker() function above on some worker box
+somewhere, pushing matched status messages to the client via a list
+named sub:...</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="my_application.streaming_api.worker">
+<tt class="descclassname">my_application.streaming_api.</tt><tt class="descname">worker</tt><big>(</big><em>hostinfo</em>, <em>backlog</em>, <em>which</em>, <em>content</em>, <em>subscriber</em><big>)</big><a class="headerlink" href="#my_application.streaming_api.worker" title="Permalink to this definition">¶</a></dt>
+<dd><p>This worker handles the scanning of status message content against the
+user-requested filters.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">my_application Package</a><ul>
+<li><a class="reference internal" href="#module-my_application.streaming_api"><tt class="docutils literal"><span class="pre">streaming_api</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/my_application.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Random Project 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Impermium.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,6 +1,8 @@
 my_application Package
 ======================
 
+Here is more detail.
+
 :mod:`streaming_api` Module
 ---------------------------
 
